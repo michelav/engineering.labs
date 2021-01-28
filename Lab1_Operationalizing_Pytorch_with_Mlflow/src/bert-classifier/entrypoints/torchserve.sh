@@ -1,6 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
-torchserve --start --model-store model_store
+set -m
+
+torchserve --start --model-store model_store & 
 
 mlflow deployments create \
         -t torchserve \
@@ -8,3 +10,5 @@ mlflow deployments create \
         --name news_classification \
         -C "MODEL_FILE=news_classifier.py" \
         -C "HANDLER=news_classifier_handler.py"
+
+fg %1

@@ -16,23 +16,16 @@ RUN mkdir -p ${MLFLOW_HOME}/scripts && \
     mkdir -p ${MODEL_STORE} && \
     echo "${GCP_CREDS_JSON_BASE64_ENV}"| base64 --decode > "${GOOGLE_APPLICATION_CREDENTIALS}" && \
     mkdir -p /usr/share/man/man1/ && \
-    apt-get update && apt-get install --no-install-recommends -y git default-jdk wget && \
+    apt-get update && apt-get install --no-install-recommends -y openjdk-11-jre-headless && \
     apt-get clean -y -qq && apt-get autoremove -y -qq && \
     rm -rf /var/lib/apt/lists/* && \
-    git clone https://github.com/pytorch/serve.git && \
-    cd serve && python ./ts_scripts/install_dependencies.py && \
-    pip install --no-cache-dir torch==1.7.1+cpu torchvision==0.8.2+cpu torchaudio==0.7.2 torchserve torch-model-archiver -f https://download.pytorch.org/whl/torch_stable.html && \
-    pip install --no-cache-dir -r /tmp/requirements.txt \
-    pip install --no-cache-dir -r /tmp/requirements-torchserve.txt
-
+    pip install --no-cache-dir -r /tmp/requirements.txt -r /tmp/requirements-torchserve.txt -f https://download.pytorch.org/whl/torch_stable.html
+    
 COPY entrypoints/torchserve.sh ${MLFLOW_HOME}/scripts/run.sh
-RUN chmod +x ${MLFLOW_HOME}/scripts/run.sh
 
 # TODO: This should be taken from MLFlow
 COPY news_classifier.py ${MLFLOW_HOME}/
 COPY news_classifier_handler.py ${MLFLOW_HOME}/
-
-VOLUME ["${MLFLOW_HOME}/scripts/"]
 
 WORKDIR ${MLFLOW_HOME}
 
@@ -42,4 +35,4 @@ EXPOSE 8080
 EXPOSE 8081
 EXPOSE 8082
 
-ENTRYPOINT ["./scripts/run.sh"]
+CMD "./scripts/run.sh"
